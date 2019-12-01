@@ -66,8 +66,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
         mMap.mapType = MAP_TYPE_NORMAL
         mMap.uiSettings.isZoomControlsEnabled = false
-        mMap.setMaxZoomPreference(18f)
-        mMap.setMinZoomPreference(15f)
+        val southWest = LatLng(51.617860, -3.885071)
+        mMap.addMarker(MarkerOptions().position(southWest))
+        val northEast = LatLng(51.620361, -3.875546)
+        mMap.addMarker(MarkerOptions().position(northEast))
+        var bounds = LatLngBounds(southWest, northEast)
+        mMap.setLatLngBoundsForCameraTarget(bounds)
+        val lngSpan = northEast.longitude - southWest.longitude
+        val latSpan = northEast.latitude - southWest.latitude
+        val randomMarker = LatLng(
+            southWest.latitude + latSpan * Math.random(),
+            southWest.longitude + lngSpan * Math.random()
+        )
+        mMap.addMarker(MarkerOptions().position(randomMarker))
+        mMap.setMaxZoomPreference(21f)
+        mMap.setMinZoomPreference(16f)
         mMap.addCircle(testingCircle)
         mMap.addMarker(
             MarkerOptions().position(
