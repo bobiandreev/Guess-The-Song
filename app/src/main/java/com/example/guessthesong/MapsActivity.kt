@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
@@ -16,19 +17,27 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.GoogleMap.MAP_TYPE_HYBRID
+import com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import java.util.*
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_maps.*
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-    private lateinit var mFusedLocatiionClient: FusedLocationProviderClient
+    private lateinit var mFusedLocationClient: FusedLocationProviderClient
     val PERMISSION_ID = 42
     private var mCurrLocationMarker: Marker? = null
+    private lateinit var coordinatesNow: LatLng
+    val testingCircle = CircleOptions().center(
+        LatLng(
+            51.618381,
+            -3.878355
+        )
+    ).radius(15.0).strokeColor(Color.RED)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +48,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        mFusedLocatiionClient = LocationServices.getFusedLocationProviderClient(this)
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         getLastKnownLocation()
         requestNewLocation()
     }
@@ -55,43 +64,60 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.mapType = MAP_TYPE_HYBRID
-        mMap.uiSettings.isZoomControlsEnabled = true
-
+        mMap.mapType = MAP_TYPE_NORMAL
+        mMap.uiSettings.isZoomControlsEnabled = false
+        mMap.setMaxZoomPreference(18f)
+        mMap.setMinZoomPreference(15f)
+        mMap.addCircle(testingCircle)
+        mMap.addMarker(
+            MarkerOptions().position(
+                LatLng(
+                    51.618381, -3.878355
+                )
+            ).title("Great Hall marker").draggable(false).icon(
+                BitmapDescriptorFactory.fromResource(
+                    R.drawable.ic_audiotrack_light
+                )
+            )
+        )
+        lyricsButton.setOnClickListener { view ->
+            val intent = Intent(applicationContext, LyricsActivity::class.java)
+            startActivity(intent)
+        }
 
     }
 
     override fun onPause() {
         super.onPause()
 
-        if (mFusedLocatiionClient != null) {
-            mFusedLocatiionClient.removeLocationUpdates(mLocationCallBack)
+        if (mFusedLocationClient != null) {
+            mFusedLocationClient.removeLocationUpdates(mLocationCallBack)
         }
     }
 
     private fun getLastKnownLocation() {
         if (checkPermissions()) {
             if (isLocationEnabled()) {
-                mFusedLocatiionClient.lastLocation.addOnCompleteListener(this) { task ->
+                mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
                     var location: Location? = task.result
                     if (location == null) {
                         requestNewLocation()
                     } else {
                         var lat = location.latitude
                         var long = location.longitude
-
-                        var accuracy = location.accuracy
-
                         val locationCoorditnates = LatLng(lat, long)
                         val zoomLevel = 10f
-
-                        mCurrLocationMarker = mMap.addMarker(MarkerOptions().position(locationCoorditnates).title("Your location"))
+                        mCurrLocationMarker =
+                            mMap.addMarker(
+                                MarkerOptions().position(locationCoorditnates).title("Your location")
+                            )
                         mMap!!.animateCamera(
                             CameraUpdateFactory.newLatLngZoom(
                                 locationCoorditnates,
                                 zoomLevel
                             )
                         )
+
                     }
                 }
             } else {
@@ -111,8 +137,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mLocationRequest.interval = 2000
         mLocationRequest.fastestInterval = 1000
 
-        mFusedLocatiionClient = LocationServices.getFusedLocationProviderClient(this)
-        mFusedLocatiionClient!!.requestLocationUpdates(
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        mFusedLocationClient!!.requestLocationUpdates(
             mLocationRequest,
             mLocationCallBack,
             Looper.myLooper()
@@ -137,13 +163,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 var lat = mLastLocation.latitude
                 var long = mLastLocation.longitude
-                mMap.setOnMarkerClickListener{marker ->
-                    clickOnMarker(marker)
-                    true
-                }
+
                 val lastCoordinates = LatLng(lat, long)
+                coordinatesNow = lastCoordinates
                 val markerOptions = MarkerOptions().position(lastCoordinates).title("Your Location")
-              //  markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.cast_ic_expanded_controller_play))
                 mCurrLocationMarker = mMap.addMarker(markerOptions)
                 mCurrLocationMarker
                 mMap!!.animateCamera(CameraUpdateFactory.newLatLng(lastCoordinates))
@@ -196,7 +219,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun clickOnMarker(marker: Marker){
+    private fun checkInRadius(): Boolean {
+        val distance = FloatArray(2)
+        Location.distanceBetween(
+            coordinatesNow.latitude,
+            coordinatesNow.longitude,
+            testingCircle.center.latitude,
+            testingCircle.center.longitude,
+            distance
+        )
+        distance.forEach { println("Distance" + it) }
 
+        return distance[0] < testingCircle.radius
     }
 }

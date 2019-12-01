@@ -18,7 +18,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SongManagerTesting"></activity>
+        <activity
+            android:name=".LyricsActivity"
+            android:label="@string/title_activity_lyrics"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".SongManagerTesting" />
         <activity
             android:name=".MainMenuActivity"
             android:label="@string/title_activity_main_menu"
@@ -43,7 +47,7 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
     </application>
 
 </manifest>
