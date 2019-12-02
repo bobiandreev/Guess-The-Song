@@ -4,10 +4,10 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
 
-class SongManagerTesting : AppCompatActivity() {
+object SongManagerTesting : AppCompatActivity() {
 
-    private val classics = "Classic"
-    private val modern = "Current"
+    private const val classics = "Classic"
+    private const val modern = "Current"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,7 +16,7 @@ class SongManagerTesting : AppCompatActivity() {
         readFiles()
 
     }
-    private fun readFiles() {
+     fun readFiles()  {
         val classicsContent = assets.list(classics)!!.toMutableList()
         val modernContent = assets.list(modern)!!.toMutableList()
 
@@ -28,8 +28,10 @@ class SongManagerTesting : AppCompatActivity() {
         classicsContent.remove(classicsText)
         modernContent.remove(modernText)
 
-        println(nextLineClassic(classicSong))
-       // println(currentSong)
+        val nextLineClass = nextLineClassic((classicSong))
+        classicSong.remove(nextLineClass)
+        println(nextLineClass)
+        println(currentSong)
     }
 
     fun nextLineClassic(classicSong: MutableList<String>) : String {

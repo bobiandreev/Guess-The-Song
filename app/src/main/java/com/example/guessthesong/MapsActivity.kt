@@ -21,23 +21,21 @@ import com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_maps.*
+import kotlinx.android.synthetic.main.content_main_menu.*
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
-    val PERMISSION_ID = 42
+    private val PERMISSION_ID = 42
     private var mCurrLocationMarker: Marker? = null
     private lateinit var coordinatesNow: LatLng
-    val testingCircle = CircleOptions().center(
-        LatLng(
-            51.618381,
-            -3.878355
-        )
-    ).radius(15.0).strokeColor(Color.RED)
+    private lateinit var lyricCircle: Circle
+    private lateinit var lyricsMarker: Marker
+    private val southWest = LatLng(51.617860, -3.885071)
+    private val northEast = LatLng(51.620361, -3.875546)
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,38 +64,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
         mMap.mapType = MAP_TYPE_NORMAL
         mMap.uiSettings.isZoomControlsEnabled = false
-        val southWest = LatLng(51.617860, -3.885071)
-        mMap.addMarker(MarkerOptions().position(southWest))
-        val northEast = LatLng(51.620361, -3.875546)
-        mMap.addMarker(MarkerOptions().position(northEast))
-        var bounds = LatLngBounds(southWest, northEast)
-        mMap.setLatLngBoundsForCameraTarget(bounds)
-        val lngSpan = northEast.longitude - southWest.longitude
-        val latSpan = northEast.latitude - southWest.latitude
-        val randomMarker = LatLng(
-            southWest.latitude + latSpan * Math.random(),
-            southWest.longitude + lngSpan * Math.random()
-        )
-        mMap.addMarker(MarkerOptions().position(randomMarker))
         mMap.setMaxZoomPreference(21f)
         mMap.setMinZoomPreference(16f)
-        mMap.addCircle(testingCircle)
-        mMap.addMarker(
-            MarkerOptions().position(
-                LatLng(
-                    51.618381, -3.878355
-                )
-            ).title("Great Hall marker").draggable(false).icon(
-                BitmapDescriptorFactory.fromResource(
-                    R.drawable.ic_audiotrack_light
-                )
-            )
-        )
-        lyricsButton.setOnClickListener { view ->
-            val intent = Intent(applicationContext, LyricsActivity::class.java)
-            startActivity(intent)
-        }
-
+        val bounds = LatLngBounds(southWest, northEast)
+        mMap.setLatLngBoundsForCameraTarget(bounds)
+        generateNewMarker()
     }
 
     override fun onPause() {
@@ -165,10 +136,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 locationResult.locations
             if (locationList.size > 0) {
                 val location = locationList[locationList.size - 1]
-                Log.i(
-                    "MapsActivity",
-                    "Location: " + location.latitude + " " + location.longitude
-                )
+//                Log.i(
+//                    "MapsActivity",
+//                    "Location: " + location.latitude + " " + location.longitude
+//                )
                 var mLastLocation = location
                 if (mCurrLocationMarker != null) {
                     mCurrLocationMarker!!.remove()
@@ -183,6 +154,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 mCurrLocationMarker = mMap.addMarker(markerOptions)
                 mCurrLocationMarker
                 mMap!!.animateCamera(CameraUpdateFactory.newLatLng(lastCoordinates))
+                checkInRadius()
             }
         }
     }
@@ -232,17 +204,42 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun checkInRadius(): Boolean {
+    private fun checkInRadius() {
         val distance = FloatArray(2)
         Location.distanceBetween(
             coordinatesNow.latitude,
             coordinatesNow.longitude,
-            testingCircle.center.latitude,
-            testingCircle.center.longitude,
+            lyricCircle.center.latitude,
+            lyricCircle.center.longitude,
             distance
         )
-        distance.forEach { println("Distance" + it) }
+        //distance.forEach { println("Distance" + it) }
+        //println(distance[0] < lyricCircle.radius)
+        if (distance[0] < lyricCircle.radius) {
+            Toast.makeText(this, "You got this one", Toast.LENGTH_LONG).show()
+            lyricsMarker.remove()
+            lyricCircle.remove()
+            generateNewMarker()
+        }
+    }
 
-        return distance[0] < testingCircle.radius
+    private fun generateNewMarker() {
+
+        val lngSpan = northEast.longitude - southWest.longitude
+        val latSpan = northEast.latitude - southWest.latitude
+        val randomMarker = LatLng(
+            southWest.latitude + latSpan * Math.random(),
+            southWest.longitude + lngSpan * Math.random()
+        )
+        lyricsMarker = mMap.addMarker(
+            MarkerOptions().position(randomMarker).title("Lyric").icon(
+                BitmapDescriptorFactory.fromResource(
+                    R.drawable.ic_audiotrack_light
+                )
+            )
+        )
+        lyricCircle =
+            mMap.addCircle(CircleOptions().center(randomMarker).radius(15.0).strokeColor(Color.TRANSPARENT))
+        println(randomMarker)
     }
 }
