@@ -16,4 +16,5 @@
     <string name="title_activity_songs">Songs</string>
     <string name="action_settings">Settings</string>
     <string name="song_search_hint">Start typing and select a song...</string>
+    <string name="search_instructions">Start typing artist name and select from the list</string>
 </resources>

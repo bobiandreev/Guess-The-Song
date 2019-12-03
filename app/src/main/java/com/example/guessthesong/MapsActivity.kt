@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.location.Location
 import android.location.LocationManager
@@ -11,9 +13,11 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -21,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.content_main_menu.*
 
 
@@ -37,7 +42,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val northEast = LatLng(51.620361, -3.875546)
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
@@ -45,10 +49,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         getLastKnownLocation()
         requestNewLocation()
+        lyricsButton.setOnClickListener {
+            val intent = Intent(applicationContext, LyricsActivity::class.java)
+            startActivity(intent)
+
+
+        }
     }
 
     /**
@@ -63,6 +72,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.mapType = MAP_TYPE_NORMAL
+        //  mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, android.R.))
         mMap.uiSettings.isZoomControlsEnabled = false
         mMap.setMaxZoomPreference(21f)
         mMap.setMinZoomPreference(16f)
@@ -151,6 +161,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val lastCoordinates = LatLng(lat, long)
                 coordinatesNow = lastCoordinates
                 val markerOptions = MarkerOptions().position(lastCoordinates).title("Your Location")
+                    .icon(
+                        bitmapDescriptorFromVector(
+                            applicationContext,
+                            R.drawable.ic_person_pin_black_24dp
+                        )
+                    )
                 mCurrLocationMarker = mMap.addMarker(markerOptions)
                 mCurrLocationMarker
                 mMap!!.animateCamera(CameraUpdateFactory.newLatLng(lastCoordinates))
@@ -216,9 +232,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //distance.forEach { println("Distance" + it) }
         //println(distance[0] < lyricCircle.radius)
         if (distance[0] < lyricCircle.radius) {
-            Toast.makeText(this, "You got this one", Toast.LENGTH_LONG).show()
+            //Toast.makeText(this, "You got this one", Toast.LENGTH_LONG).show()
             lyricsMarker.remove()
             lyricCircle.remove()
+            if (MainMenuActivity.getMode()!!) {  // Current
+                val nextLineCurrent = FileReader.nextLineCurrent()
+                Toast.makeText(this, nextLineCurrent, Toast.LENGTH_SHORT).show()
+                val intent = Intent(applicationContext, PopUpActivity::class.java)
+                intent.putExtra("LYRIC", nextLineCurrent)
+                startActivity(intent)
+            } else {    // Classic
+                val nextLineClassic = FileReader.nextLineClassic()
+                Toast.makeText(this, FileReader.nextLineClassic(), Toast.LENGTH_SHORT).show()
+                val intent = Intent(applicationContext, PopUpActivity::class.java)
+                intent.putExtra("LYRIC", nextLineClassic)
+                startActivity(intent)
+            }
             generateNewMarker()
         }
     }
@@ -239,7 +268,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         )
         lyricCircle =
-            mMap.addCircle(CircleOptions().center(randomMarker).radius(15.0).strokeColor(Color.TRANSPARENT))
+            mMap.addCircle(CircleOptions().center(randomMarker).radius(15.0).strokeColor(Color.RED))
         println(randomMarker)
+    }
+
+    private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
+        return ContextCompat.getDrawable(context, vectorResId)?.run {
+            setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+            val bitmap =
+                Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+            draw(Canvas(bitmap))
+            BitmapDescriptorFactory.fromBitmap(bitmap)
+        }
     }
 }

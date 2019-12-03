@@ -21,8 +21,7 @@
         <activity
             android:name=".LyricsActivity"
             android:label="@string/title_activity_lyrics"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".SongManagerTesting" />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".MainMenuActivity"
             android:label="@string/title_activity_main_menu"
@@ -48,6 +47,9 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
+        <activity android:name=".PopUpActivity"
+            android:theme="@style/AppTheme.PopUpStyle"
+            />
     </application>
 
 </manifest>
