@@ -2,7 +2,7 @@ package com.example.guessthesong
 
 import android.content.Context
 
-object FileReader {
+object FileReaderObject {
     private val classics = "Classic"
     private val modern = "Current"
     private lateinit var classicsContent: MutableList<String>
@@ -32,14 +32,12 @@ object FileReader {
 
     fun nextLineClassic(): String {
         val randomLyricLine = classicSong.random()
-
         classicSong.remove(randomLyricLine)
         return randomLyricLine
     }
 
     fun nextLineCurrent(): String {
         val randomLyricLine = currentSong.random()
-
         currentSong.remove(randomLyricLine)
         return randomLyricLine
     }

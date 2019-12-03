@@ -12,8 +12,6 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
-import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -26,7 +24,6 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import kotlinx.android.synthetic.main.activity_maps.*
-import kotlinx.android.synthetic.main.content_main_menu.*
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -81,13 +78,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         generateNewMarker()
     }
 
-    override fun onPause() {
-        super.onPause()
-
-        if (mFusedLocationClient != null) {
-            mFusedLocationClient.removeLocationUpdates(mLocationCallBack)
-        }
-    }
+//    override fun onPause() {
+//        super.onPause()
+//        if (mFusedLocationClient != null) {
+//            mFusedLocationClient.removeLocationUpdates(mLocationCallBack)
+//        }
+//    }
 
     private fun getLastKnownLocation() {
         if (checkPermissions()) {
@@ -235,16 +231,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             //Toast.makeText(this, "You got this one", Toast.LENGTH_LONG).show()
             lyricsMarker.remove()
             lyricCircle.remove()
-            if (MainMenuActivity.getMode()!!) {  // Current
-                val nextLineCurrent = FileReader.nextLineCurrent()
+            val intent = Intent(applicationContext, PopUpActivity::class.java)
+            if (MainMenuActivity.getMode()) {  // Current
+                val nextLineCurrent = FileReaderObject.nextLineCurrent()
+                LyricsActivity.addModernLyric(nextLineCurrent)
                 Toast.makeText(this, nextLineCurrent, Toast.LENGTH_SHORT).show()
-                val intent = Intent(applicationContext, PopUpActivity::class.java)
                 intent.putExtra("LYRIC", nextLineCurrent)
                 startActivity(intent)
             } else {    // Classic
-                val nextLineClassic = FileReader.nextLineClassic()
-                Toast.makeText(this, FileReader.nextLineClassic(), Toast.LENGTH_SHORT).show()
-                val intent = Intent(applicationContext, PopUpActivity::class.java)
+                val nextLineClassic = FileReaderObject.nextLineClassic()
+                LyricsActivity.addClassicLyric(nextLineClassic)
+                Toast.makeText(this, nextLineClassic, Toast.LENGTH_SHORT).show()
                 intent.putExtra("LYRIC", nextLineClassic)
                 startActivity(intent)
             }

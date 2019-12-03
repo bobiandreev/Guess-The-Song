@@ -12,7 +12,6 @@ import kotlin.math.roundToInt
 class PopUpActivity : AppCompatActivity() {
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.supportActionBar?.hide()
@@ -25,8 +24,8 @@ class PopUpActivity : AppCompatActivity() {
         var dm = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(dm)
 
-        val width : Int = (dm.widthPixels * 0.6).roundToInt()
-        val height : Int= (dm.heightPixels * 0.6).roundToInt()
+        val width: Int = (dm.widthPixels * 0.6).roundToInt()
+        val height: Int = (dm.heightPixels * 0.6).roundToInt()
 
         window.setLayout(width, height)
     }
