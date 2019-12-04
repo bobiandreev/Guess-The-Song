@@ -5,28 +5,46 @@ import android.content.Context
 object FileReaderObject {
     private val classics = "Classic"
     private val modern = "Current"
+
     private lateinit var classicsContent: MutableList<String>
     private lateinit var modernContent: MutableList<String>
+
     private lateinit var currentSong: MutableList<String>
     private lateinit var classicSong: MutableList<String>
+
     private lateinit var classicSongName: String
     private lateinit var currentSongName: String
 
+    private lateinit var classicsContentSearch : MutableList<String>
+    private lateinit var modernContentSearch : MutableList<String>
 
+    fun loadClassicSong(context: Context) {
+        classicsContentSearch = context.assets.list(classics)!!.toMutableList()
 
-    fun loadSongs(context: Context) {
         classicsContent = context.assets.list(classics)!!.toMutableList()
-        modernContent = context.assets.list(modern)!!.toMutableList()
 
         classicSongName = classicsContent.random()
-        currentSongName = modernContent.random()
+
         classicSong =
             context.assets.open(classics + "/" + classicSongName)
                 .bufferedReader().readLines().toMutableList()
+
+        classicsContent.remove(classicSongName)
+
+    }
+
+    fun loadModernSong(context: Context) {
+
+        modernContentSearch = context.assets.list(modern)!!.toMutableList()
+
+        modernContent = context.assets.list(modern)!!.toMutableList()
+
+        currentSongName = modernContent.random()
+
         currentSong =
             context.assets.open(modern + "/" + currentSongName)
                 .bufferedReader().readLines().toMutableList()
-        classicsContent.remove(classicSongName)
+
         modernContent.remove(currentSongName)
     }
 
@@ -48,5 +66,21 @@ object FileReaderObject {
 
     fun getClassicSongs(): MutableList<String> {
         return classicsContent
+    }
+
+    fun getModernSongsSearch(): MutableList<String> {
+        return modernContentSearch
+    }
+
+    fun getClassicSongsSearch(): MutableList<String> {
+        return classicsContentSearch
+    }
+
+    fun getClassicSong() : String {
+        return classicSongName
+    }
+
+    fun getModernSong() : String{
+        return currentSongName
     }
 }

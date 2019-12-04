@@ -3,9 +3,6 @@ package com.example.guessthesong
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.view.Window
-import android.view.WindowManager
-import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_pop_up.*
 import kotlin.math.roundToInt
 
@@ -17,10 +14,10 @@ class PopUpActivity : AppCompatActivity() {
         this.supportActionBar?.hide()
         setContentView(R.layout.activity_pop_up)
 
-        val songLyric = intent.getStringExtra("LYRIC")
-        val congratulations = "Congratulations you have found a new lyric! \n\n"
+
+        val message = intent.getStringExtra("STRING")
         //Toast.makeText(this, R.string.congratulations, Toast.LENGTH_SHORT)
-        congratulationsMsg.setText(congratulations + songLyric)
+        congratulationsMsg.setText(message)
         var dm = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(dm)
 

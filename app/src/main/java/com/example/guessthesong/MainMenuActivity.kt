@@ -14,7 +14,8 @@ class MainMenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_menu)
         setSupportActionBar(toolbar)
-        FileReaderObject.loadSongs(applicationContext)
+        FileReaderObject.loadClassicSong(applicationContext)
+        FileReaderObject.loadModernSong(applicationContext)
         SongsHistoryButton.setOnClickListener {
 
         }

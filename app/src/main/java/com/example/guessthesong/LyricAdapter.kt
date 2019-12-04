@@ -20,7 +20,6 @@ class LyricAdapter(private val lyricsModelArrayList: MutableList<String>) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val v = inflater.inflate(R.layout.lyric_item, parent, false)
-
         return ViewHolder(v)
     }
 

@@ -232,17 +232,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             lyricsMarker.remove()
             lyricCircle.remove()
             val intent = Intent(applicationContext, PopUpActivity::class.java)
+            val congratulations = "Congratulations you have found a new lyric! \n\n"
             if (MainMenuActivity.getMode()) {  // Current
                 val nextLineCurrent = FileReaderObject.nextLineCurrent()
                 LyricsActivity.addModernLyric(nextLineCurrent)
-                Toast.makeText(this, nextLineCurrent, Toast.LENGTH_SHORT).show()
-                intent.putExtra("LYRIC", nextLineCurrent)
+             //   Toast.makeText(this, nextLineCurrent, Toast.LENGTH_SHORT).show()
+                intent.putExtra("STRING", congratulations + nextLineCurrent)
                 startActivity(intent)
             } else {    // Classic
                 val nextLineClassic = FileReaderObject.nextLineClassic()
                 LyricsActivity.addClassicLyric(nextLineClassic)
-                Toast.makeText(this, nextLineClassic, Toast.LENGTH_SHORT).show()
-                intent.putExtra("LYRIC", nextLineClassic)
+             //   Toast.makeText(this, nextLineClassic, Toast.LENGTH_SHORT).show()
+                intent.putExtra("STRING", congratulations + nextLineClassic)
                 startActivity(intent)
             }
             generateNewMarker()
