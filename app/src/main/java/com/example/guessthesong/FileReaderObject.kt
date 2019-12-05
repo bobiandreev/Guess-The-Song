@@ -1,6 +1,8 @@
 package com.example.guessthesong
 
+import android.R
 import android.content.Context
+import android.widget.ArrayAdapter
 
 object FileReaderObject {
     private val classics = "Classic"
@@ -15,8 +17,33 @@ object FileReaderObject {
     private lateinit var classicSongName: String
     private lateinit var currentSongName: String
 
-    private lateinit var classicsContentSearch : MutableList<String>
-    private lateinit var modernContentSearch : MutableList<String>
+    private lateinit var classicsContentSearch: MutableList<String>
+    private lateinit var modernContentSearch: MutableList<String>
+    private var formattedList: MutableList<String> = ArrayList()
+    private var formattedString = ""
+
+
+    fun transformListToNiceString(list: MutableList<String>): MutableList<String> {
+        list.forEach { s ->
+            // s.dropLast(4)
+            val arrayOf = s.split("\\(|\\)".toRegex())
+            val artistName = arrayOf[0].replace('_', ' ').capitalizeWords()
+            val songName = arrayOf[1].replace('_', ' ').capitalizeWords()
+            val formattedString = songName + " by " + artistName
+            formattedList.add(formattedString)
+        }
+        return formattedList
+    }
+
+    fun transformToNiceString(string: String) : String{
+        val arrayOf = string.split("\\(|\\)".toRegex())
+        val artistName = arrayOf[0].replace('_', ' ').capitalizeWords()
+        val songName = arrayOf[1].replace('_', ' ').capitalizeWords()
+        formattedString =  songName + " by " + artistName
+        return formattedString
+    }
+
+    fun String.capitalizeWords(): String = split(" ").map { it.capitalize() }.joinToString(" ")
 
     fun loadClassicSong(context: Context) {
         classicsContentSearch = context.assets.list(classics)!!.toMutableList()
@@ -76,11 +103,31 @@ object FileReaderObject {
         return classicsContentSearch
     }
 
-    fun getClassicSong() : String {
+    fun getClassicSong(): String {
         return classicSongName
     }
 
-    fun getModernSong() : String{
+    fun getModernSong(): String {
         return currentSongName
+    }
+
+    fun setAdapter(context: Context): ArrayAdapter<String> {
+        if (MainMenuActivity.getMode()) {
+            val songs: ArrayAdapter<String> =
+                ArrayAdapter(
+                    context,
+                    R.layout.simple_list_item_1,
+                    transformListToNiceString(getModernSongsSearch())
+                )
+            return songs
+        } else {
+            val songs: ArrayAdapter<String> =
+                ArrayAdapter(
+                    context,
+                    R.layout.simple_list_item_1,
+                    (transformListToNiceString(getClassicSongsSearch()))
+                )
+            return songs
+        }
     }
 }

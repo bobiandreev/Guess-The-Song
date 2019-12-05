@@ -3,93 +3,110 @@ package com.example.guessthesong
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_lyrics.*
 
 
 class LyricsActivity : AppCompatActivity() {
 
 
+    private var guess: AutoCompleteTextView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lyrics)
         setSupportActionBar(toolbar)
 
+
+        Toast.makeText(this, FileReaderObject.getClassicSong(), Toast.LENGTH_SHORT).show()
         skipThisSongButton.setOnClickListener { view ->
             val message = "This song was \n"
             val intent = Intent(applicationContext, PopUpActivity::class.java)
 
             if (MainMenuActivity.getMode()) {
-//                Snackbar.make(view, "This was: " + FileReaderObject.getModernSong(), Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null).show()
-                intent.putExtra("STRING", message + FileReaderObject.getModernSong())
+                intent.putExtra(
+                    "STRING",
+                    message + FileReaderObject.transformToNiceString(FileReaderObject.getModernSong())
+                )
                 startActivity(intent)
                 clearModernList()
                 FileReaderObject.loadModernSong(applicationContext)
                 loadList()
+                resetModern()
             } else {
-//                Snackbar.make(view, "This was: " + FileReaderObject.getClassicSong(), Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null).show()
-                intent.putExtra("STRING", message + FileReaderObject.getClassicSong())
+                intent.putExtra(
+                    "STRING",
+                    message + FileReaderObject.transformToNiceString(FileReaderObject.getClassicSong())
+                )
                 startActivity(intent)
                 clearClassicList()
                 FileReaderObject.loadClassicSong(applicationContext)
                 loadList()
+                resetClassic()
             }
         }
-        val guess: AutoCompleteTextView = findViewById(R.id.actv)
 
+        val pointsForSong = resources.getString(R.string.points_for_song)
         if (MainMenuActivity.getMode()) {
-            val songs: ArrayAdapter<String> =
-                ArrayAdapter(
-                    this,
-                    android.R.layout.simple_list_item_1,
-                    FileReaderObject.getModernSongsSearch()
-                )
-            guess.setAdapter(songs)
+            textViewPoints.setText(pointsForSong + modernSongPoints)
         } else {
-            val songs: ArrayAdapter<String> =
-                ArrayAdapter(
-                    this,
-                    android.R.layout.simple_list_item_1,
-                    FileReaderObject.getClassicSongsSearch()
-                )
-            println(FileReaderObject.getClassicSong())
-            //FileReaderObject.getClassicSongsSearch().forEach { println(it) }
-            guess.setAdapter(songs)
+            textViewPoints.setText(pointsForSong + classicSongPoints)
         }
 
-        guess.setOnItemClickListener { parent, arg1, pos, id ->
-
+        guess = findViewById(R.id.actv)
+        guess!!.setOnItemClickListener { parent, arg1, pos, id ->
+            val message = resources.getString(R.string.correct_song_message)
+            val intentPopUp = Intent(applicationContext, PopUpActivity::class.java)
+            intentPopUp.putExtra("STRING", message)
             if (MainMenuActivity.getMode()) {
-
-                if (guess.text.toString().equals(FileReaderObject.getModernSong())) {
-                    val toastNice = Toast.makeText(this, "Nice", Toast.LENGTH_SHORT).show()
-                    toastNice
+                if (guess!!.text.toString().equals(
+                        FileReaderObject.transformToNiceString(
+                            FileReaderObject.getModernSong()
+                        )
+                    )
+                ) {
+                    startActivity(intentPopUp)
+                    clearModernList()
+                    FileReaderObject.loadModernSong(applicationContext)
+                    loadList()
+                    MainMenuActivity.updatePoints(modernSongPoints)
+                    resetModern()
                 } else {
-                    val toastNotNice = Toast.makeText(this, "Not Nice", Toast.LENGTH_SHORT).show()
-                    toastNotNice
+                    wrongGuessModern()
                 }
-
             } else {
-
-                if (guess.text.toString().equals(FileReaderObject.getClassicSong())) {
-                    val toastNice = Toast.makeText(this, "Nice", Toast.LENGTH_SHORT).show()
-                    toastNice
+                if (guess!!.text.toString().equals(
+                        FileReaderObject.transformToNiceString(
+                            FileReaderObject.getClassicSong()
+                        )
+                    )
+                ) {
+                    startActivity(intentPopUp)
+                    clearClassicList()
+                    FileReaderObject.loadClassicSong(applicationContext)
+                    loadList()
+                    MainMenuActivity.updatePoints(classicSongPoints)
+                    resetClassic()
                 } else {
-                    val toastNotNice = Toast.makeText(this, "Not Nice", Toast.LENGTH_SHORT).show()
-                    toastNotNice
+                    wrongGuessClassic()
                 }
             }
         }
+
+        guess!!.setAdapter(FileReaderObject.setAdapter(this))
+
         loadList()
     }
+
+//    override fun onPause() {
+//        super.onPause()
+//        Toast.makeText(this, "Paused", Toast.LENGTH_SHORT).show()
+//        guess = null
+//    }
 
     private fun loadList() {
         val lyricsList: MutableList<String> = populateList()
@@ -103,28 +120,56 @@ class LyricsActivity : AppCompatActivity() {
 
     private fun populateList(): MutableList<String> {
         var list: MutableList<String> = ArrayList()
+        val msg = resources.getString(R.string.collect_lyric_message)
         if (MainMenuActivity.getMode()) {
             list = getModernLyrics()
         } else {
             list = getClassicLyrics()
         }
-        val msg = "Collect a lyric."
-        if (list.size == 0) {
 
+        if (list.size == 0) {
+            textViewPoints.visibility = View.INVISIBLE
             list.add(msg)
         } else {
-            try {
+            if(list.size == 1 && list.contains(msg)){
+                textViewPoints.visibility = View.INVISIBLE
                 list.remove(msg)
-            } catch (e: Exception) {
-                println("List is empty")
+                list.add(msg)
             }
         }
         return list
     }
 
     companion object LyricHolder {
+        private var initialStart = 0
+        private var modernSongPoints = 21
+        private var classicSongPoints = 21
         private var modernLyricsList: MutableList<String> = ArrayList()
         private var classicLyricsList: MutableList<String> = ArrayList()
+
+        fun resetClassic() {
+            classicSongPoints = 21
+        }
+
+        fun resetModern() {
+            modernSongPoints = 21
+        }
+
+        fun additionalLyricModern() {
+            modernSongPoints--
+        }
+
+        fun additionalLyricClassic() {
+            classicSongPoints--
+        }
+
+        fun wrongGuessModern() {
+            modernSongPoints -= 2
+        }
+
+        fun wrongGuessClassic() {
+            classicSongPoints -= 2
+        }
 
         fun addModernLyric(lyric: String) {
             modernLyricsList.add(lyric)

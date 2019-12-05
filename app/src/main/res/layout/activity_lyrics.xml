@@ -53,22 +53,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/Instructions" />
 
-    <Button
-            android:id="@+id/skipThisSongButton"
-            android:layout_width="127dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:layout_margin="@dimen/fab_margin"
-            android:layout_marginBottom="36dp"
-            android:background="#D81B60"
-            android:backgroundTint="#E91E63"
-            android:shadowColor="#D81B60"
-            android:text="@string/song_skip_button"
-            android:textColor="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -89,5 +73,29 @@
             android:scrollbars="vertical"/>
 
     </RelativeLayout>
+
+    <Button
+        android:id="@+id/skipThisSongButton"
+        android:layout_width="127dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="@dimen/fab_margin"
+        android:layout_marginBottom="36dp"
+        android:background="#D81B60"
+        android:backgroundTint="#E91E63"
+        android:shadowColor="#D81B60"
+        android:text="@string/song_skip_button"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewPoints"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="36dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/skipThisSongButton"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
