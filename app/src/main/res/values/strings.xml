@@ -21,4 +21,5 @@
     <string name="correct_song_message">Congratulations! That is the correct song! \n</string>
     <string name="collect_lyric_message">Collect a lyric.</string>
     <string name="points_for_song">Your current points for this song are: </string>
+    <string name="new_lyric_found">Congratulations you have found a new lyric! \n\n</string>
 </resources>

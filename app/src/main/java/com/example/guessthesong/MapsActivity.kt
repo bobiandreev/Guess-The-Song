@@ -233,7 +233,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             lyricsMarker.remove()
             lyricCircle.remove()
             val intent = Intent(applicationContext, PopUpActivity::class.java)
-            val congratulations = "Congratulations you have found a new lyric! \n\n"
+            val congratulations = resources.getString(R.string.new_lyric_found)
             if (MainMenuActivity.getMode()) {  // Current
                 val nextLineCurrent = FileReaderObject.nextLineCurrent()
                 LyricsActivity.addModernLyric(nextLineCurrent)
