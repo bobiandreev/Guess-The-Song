@@ -22,6 +22,16 @@ object FileReaderObject {
     private var formattedList: MutableList<String> = ArrayList()
     private var formattedString = ""
 
+    private var songHistoryList : MutableList<Song> = ArrayList()
+
+
+    fun getSongHistoryList() : MutableList<Song>{
+        return songHistoryList
+    }
+
+    fun addToSongHistoryList(addition : Song){
+        songHistoryList.add(addition)
+    }
 
     fun transformListToNiceString(list: MutableList<String>): MutableList<String> {
         list.forEach { s ->
@@ -44,6 +54,10 @@ object FileReaderObject {
     }
 
     fun String.capitalizeWords(): String = split(" ").map { it.capitalize() }.joinToString(" ")
+
+    fun getSongText(context: Context, path : String) : String {
+        return context.assets.open(path).bufferedReader().readText()
+    }
 
     fun loadClassicSong(context: Context) {
         classicsContentSearch = context.assets.list(classics)!!.toMutableList()
@@ -113,20 +127,38 @@ object FileReaderObject {
 
     fun setAdapter(context: Context): ArrayAdapter<String> {
         if (MainMenuActivity.getMode()) {
-            val songs: ArrayAdapter<String> =
+            var songs: ArrayAdapter<String> =
                 ArrayAdapter(
                     context,
                     R.layout.simple_list_item_1,
                     transformListToNiceString(getModernSongsSearch())
                 )
+            /*for (song in getModernSongsSearch()) {
+                var i = 0
+                while (i < songs.count) {
+                    if (songs.getItem(i).equals(song)) {
+                        songs.remove(song)
+                    }
+                }
+                songs.add(song)
+            }*/
             return songs
         } else {
-            val songs: ArrayAdapter<String> =
+            var songs: ArrayAdapter<String> =
                 ArrayAdapter(
                     context,
                     R.layout.simple_list_item_1,
                     (transformListToNiceString(getClassicSongsSearch()))
                 )
+          /*  for (song in getClassicSongsSearch()) {
+                var i = 0
+                while (i < songs.count) {
+                    if (songs.getItem(i).equals(song)) {
+                        songs.remove(song)
+                    }
+                }
+                songs.add(song)
+            }*/
             return songs
         }
     }

@@ -5,7 +5,7 @@
     android:id="@+id/pop_up_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/rounded"
+    android:background="@drawable/rounded_theme"
     tools:context=".PopUpActivity">
 
     <TextView

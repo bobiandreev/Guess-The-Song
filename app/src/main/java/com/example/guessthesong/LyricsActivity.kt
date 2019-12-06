@@ -3,6 +3,7 @@ package com.example.guessthesong
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +16,6 @@ class LyricsActivity : AppCompatActivity() {
 
 
     private var guess: AutoCompleteTextView? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lyrics)
@@ -30,7 +30,12 @@ class LyricsActivity : AppCompatActivity() {
             if (MainMenuActivity.getMode()) {
                 intent.putExtra(
                     "STRING",
-                    message + FileReaderObject.transformToNiceString(FileReaderObject.getModernSong())
+                    message + FileReaderObject.transformToNiceString(
+                        FileReaderObject.getModernSong()
+                    )
+                )
+                FileReaderObject.addToSongHistoryList(
+                    Song(FileReaderObject.getModernSong(), "Current")
                 )
                 startActivity(intent)
                 clearModernList()
@@ -41,6 +46,10 @@ class LyricsActivity : AppCompatActivity() {
                 intent.putExtra(
                     "STRING",
                     message + FileReaderObject.transformToNiceString(FileReaderObject.getClassicSong())
+                )
+                FileReaderObject.addToSongHistoryList(
+                    Song(FileReaderObject.getClassicSong(), "Classic")
+
                 )
                 startActivity(intent)
                 clearClassicList()
@@ -56,12 +65,14 @@ class LyricsActivity : AppCompatActivity() {
         } else {
             textViewPoints.setText(pointsForSong + classicSongPoints)
         }
-
         guess = findViewById(R.id.actv)
+
         guess!!.setOnItemClickListener { parent, arg1, pos, id ->
+
             val message = resources.getString(R.string.correct_song_message)
             val intentPopUp = Intent(applicationContext, PopUpActivity::class.java)
             intentPopUp.putExtra("STRING", message)
+
             if (MainMenuActivity.getMode()) {
                 if (guess!!.text.toString().equals(
                         FileReaderObject.transformToNiceString(
@@ -69,15 +80,23 @@ class LyricsActivity : AppCompatActivity() {
                         )
                     )
                 ) {
+                    FileReaderObject.addToSongHistoryList(
+                        Song(
+                            FileReaderObject.getModernSong(), "Current"
+                        )
+                    )
+
                     startActivity(intentPopUp)
                     clearModernList()
                     FileReaderObject.loadModernSong(applicationContext)
                     loadList()
                     MainMenuActivity.updatePoints(modernSongPoints)
                     resetModern()
+
                 } else {
                     wrongGuessModern()
                 }
+
             } else {
                 if (guess!!.text.toString().equals(
                         FileReaderObject.transformToNiceString(
@@ -85,6 +104,11 @@ class LyricsActivity : AppCompatActivity() {
                         )
                     )
                 ) {
+                    FileReaderObject.addToSongHistoryList(
+                        Song(
+                            FileReaderObject.getClassicSong(), "Classic"
+                        )
+                    )
                     startActivity(intentPopUp)
                     clearClassicList()
                     FileReaderObject.loadClassicSong(applicationContext)
@@ -96,17 +120,15 @@ class LyricsActivity : AppCompatActivity() {
                 }
             }
         }
-
         guess!!.setAdapter(FileReaderObject.setAdapter(this))
-
         loadList()
     }
 
-//    override fun onPause() {
-//        super.onPause()
-//        Toast.makeText(this, "Paused", Toast.LENGTH_SHORT).show()
-//        guess = null
-//    }
+    override fun onPause() {
+        super.onPause()
+        Toast.makeText(this, "Paused", Toast.LENGTH_SHORT).show()
+
+    }
 
     private fun loadList() {
         val lyricsList: MutableList<String> = populateList()
@@ -131,10 +153,12 @@ class LyricsActivity : AppCompatActivity() {
             textViewPoints.visibility = View.INVISIBLE
             list.add(msg)
         } else {
-            if(list.size == 1 && list.contains(msg)){
+            if (list.size == 1 && list.contains(msg)) {
                 textViewPoints.visibility = View.INVISIBLE
                 list.remove(msg)
                 list.add(msg)
+            } else {
+                list.remove(msg)
             }
         }
         return list

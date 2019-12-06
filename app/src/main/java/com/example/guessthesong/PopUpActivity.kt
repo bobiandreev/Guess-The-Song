@@ -15,10 +15,13 @@ class PopUpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         this.supportActionBar?.hide()
         setContentView(R.layout.activity_pop_up)
+
         window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+
         val message = intent.getStringExtra("STRING")
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         congratulationsMsg.setText(message)
+
         var dm = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(dm)
 

@@ -1,6 +1,8 @@
 package com.example.guessthesong
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
@@ -19,12 +21,19 @@ class MainMenuActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         FileReaderObject.loadClassicSong(applicationContext)
         FileReaderObject.loadModernSong(applicationContext)
+
+
         SongsHistoryButton.setOnClickListener {
+            var intent = Intent(applicationContext, SongHistoryActivity::class.java)
+            startActivity(intent)
         }
 
+
+        window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         modeSwitch.setOnClickListener {
             mode = modeSwitch.isChecked
         }
+
         playButton.setOnClickListener {
             val intent = Intent(applicationContext, MapsActivity::class.java)
             startActivity(intent)
