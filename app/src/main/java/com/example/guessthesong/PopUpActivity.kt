@@ -10,7 +10,10 @@ import kotlin.math.roundToInt
 
 class PopUpActivity : AppCompatActivity() {
 
-
+    /**
+     * Called whenever the Pop Up activity is started. It sets the text displayed on the pop up and
+     * its form.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.supportActionBar?.hide()

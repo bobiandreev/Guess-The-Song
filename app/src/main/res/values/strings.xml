@@ -25,6 +25,7 @@
     <string name="song_name">Song Name</string>
     <string name="msg_song_history_list">You have no song history yet.</string>
     <string name="title_activity_text_view">TextViewActivity</string>
+    <string name="fail_message">The song was \n</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 

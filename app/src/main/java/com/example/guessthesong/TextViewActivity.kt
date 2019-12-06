@@ -14,6 +14,11 @@ import kotlinx.android.synthetic.main.content_text_view.*
 
 class TextViewActivity : AppCompatActivity() {
 
+    /**
+     * Called whenever the user requests to access the full text of a song they've seen already.
+     * It sets up the layout with the correct text and the listener for the button which loads the
+     * songs video on YouTube.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_text_view)
@@ -23,24 +28,18 @@ class TextViewActivity : AppCompatActivity() {
         var toolbar: CollapsingToolbarLayout = findViewById(R.id.toolbar_layout)
         var id = assets.open("Links/"+ title).bufferedReader().readText()
         Toast.makeText(this, id, Toast.LENGTH_SHORT).show()
+
+        /**
+         * When clicked the appropriate video is launched from the phones YouTube app as it provides
+         * additional functionality.
+         * Source: StackOverflow - edited
+         */
         fab.setOnClickListener { view ->
 
             val appIntent =
                 Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:$id"))
-            val webIntent = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("http://www.youtube.com/watch?v=$id")
-            )
-            try {
-                startActivity(webIntent)
-            } catch (ex: ActivityNotFoundException) {
                 startActivity(appIntent)
-            }
-            try {
-                startActivity(appIntent)
-            } catch (ex: ActivityNotFoundException) {
-                startActivity(webIntent)
-            }
+
         }
 
         toolbar.title = FileReaderObject.transformToNiceString(title)

@@ -7,6 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
+/**
+ * Adapter class for the recycler views. Contains a listener when a user taps on one of the entries.
+ * Source: Blackboard - CSC306 Source code - edited
+ */
 class LyricAdapter(private val lyricsModelArrayList: MutableList<String>) :
     RecyclerView.Adapter<LyricAdapter.ViewHolder>() {
 

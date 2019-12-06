@@ -38,10 +38,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val southWest = LatLng(51.617860, -3.885071)
     private val northEast = LatLng(51.620361, -3.875546)
 
-    companion object MapsCompanion {
-
-    }
-
+    /**
+     * Called when the activity is called in the foreground. Sets up the view, the listener
+     * for the lyrics button and the Fused Location Client we are using for location.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
@@ -50,8 +50,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        getLastKnownLocation()
-        requestNewLocation()
         lyricsButton.setOnClickListener {
             val intent = Intent(applicationContext, LyricsActivity::class.java)
             startActivity(intent)
@@ -61,11 +59,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
+     * This is where we can add markers or lines, add listeners or move the camera.
+     *
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
+     *
+     * Sets map properties and calls for last location and location updates.
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
@@ -76,9 +76,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.setMinZoomPreference(16f)
         val bounds = LatLngBounds(southWest, northEast)
         mMap.setLatLngBoundsForCameraTarget(bounds)
+        getLastKnownLocation()
+        requestNewLocation()
         generateNewMarker()
     }
 
+    /**
+     * Stops the location updates when the activity is not in the foreground to save system resources.
+     */
 //    override fun onPause() {
 //        super.onPause()
 //        if (mFusedLocationClient != null) {
@@ -86,6 +91,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        }
 //    }
 
+    /**
+     * Whenever the activity is called back in the foreground the location updates are restarted.
+     */
+//    override fun onResume() {
+//        super.onResume()
+//        requestNewLocation()
+//    }
+
+    /**
+     * Gets the lst location of the user and stores the coordinates. Checks if the necessary permissions
+     * are allowed and the necessary sensors are available.
+     */
     private fun getLastKnownLocation() {
         if (checkPermissions()) {
             if (isLocationEnabled()) {
@@ -121,6 +138,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Request a location update. Sets the priority of the request and how often a requeste is made.
+     */
     private fun requestNewLocation() {
         var mLocationRequest = LocationRequest()
 
@@ -136,6 +156,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
+    /**
+     * Updates the location marker at the set interval. At every marker update it
+     * checks whether the user is within the designated radius around a lyric.
+     */
     private val mLocationCallBack = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
 
@@ -143,10 +167,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 locationResult.locations
             if (locationList.size > 0) {
                 val location = locationList[locationList.size - 1]
-//                Log.i(
-//                    "MapsActivity",
-//                    "Location: " + location.latitude + " " + location.longitude
-//                )
                 var mLastLocation = location
                 if (mCurrLocationMarker != null) {
                     mCurrLocationMarker!!.remove()
@@ -172,6 +192,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Checks if the phones location is on.
+     * @return true if it is enabled false otherwise
+     */
     private fun isLocationEnabled(): Boolean {
         var locationManager: LocationManager =
             getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -179,6 +203,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
+    /**
+     * Checks if the necessary permissions have been given. If they have been returns true otherwise
+     * requests them.
+     * @return true if all permissions are available false otherwise
+     */
     private fun checkPermissions(): Boolean {
 
         if (ActivityCompat.checkSelfPermission(
@@ -194,6 +223,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         return false
     }
 
+    /**
+     * Requests permissions if some are lacking.
+     */
     private fun requestPermissions() {
         ActivityCompat.requestPermissions(
             this,
@@ -205,6 +237,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
+    /**
+     * Called when permissions are granted. Used to check last known location and request a new one.
+     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -217,6 +252,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Used to calculate the distance between the users location and to check if the user is
+     * within the radius of the lyric. If they are within the radius the lyric is added to the list
+     * of collected lyrics, a message is displayed and a new lyric is generated.
+     */
     private fun checkInRadius() {
         val distance = FloatArray(2)
         Location.distanceBetween(
@@ -234,23 +274,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             lyricCircle.remove()
             val intent = Intent(applicationContext, PopUpActivity::class.java)
             val congratulations = resources.getString(R.string.new_lyric_found)
+
             if (MainMenuActivity.getMode()) {  // Current
                 val nextLineCurrent = FileReaderObject.nextLineCurrent()
                 LyricsActivity.addModernLyric(nextLineCurrent)
                 intent.putExtra("STRING", congratulations + nextLineCurrent)
                 startActivity(intent)
                 LyricsActivity.additionalLyricModern()
+                if (LyricsActivity.getModernSongPoints() <= 0){
+                    LyricsActivity.skipSong(applicationContext, LyricsActivity())
+                }
             } else {    // Classic
                 val nextLineClassic = FileReaderObject.nextLineClassic()
                 LyricsActivity.addClassicLyric(nextLineClassic)
                 intent.putExtra("STRING", congratulations + nextLineClassic)
                 startActivity(intent)
                 LyricsActivity.additionalLyricClassic()
+                if (LyricsActivity.getClassicSongPoints() <= 0){
+                    LyricsActivity.skipSong(applicationContext, LyricsActivity())
+                }
             }
             generateNewMarker()
         }
     }
 
+    /**
+     * Generates a new lyric at a random location in the designated area.
+     */
     private fun generateNewMarker() {
 
         val lngSpan = northEast.longitude - southWest.longitude
@@ -271,6 +321,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         println(randomMarker)
     }
 
+    /**
+     * Converts a vector image to bitmap.
+     * Source: StackOverflow
+     */
     private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
         return ContextCompat.getDrawable(context, vectorResId)?.run {
             setBounds(0, 0, intrinsicWidth, intrinsicHeight)

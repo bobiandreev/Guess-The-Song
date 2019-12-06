@@ -9,10 +9,15 @@ import androidx.recyclerview.widget.RecyclerView
 
 class SongHistoryActivity : AppCompatActivity() {
 
+    /**
+     * Called whenever the song history activity is started. It sets up the recycler view which displays
+     * the songs the user has already gone through and the listener which is waiting for the user to
+     * select one of them.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_song_history)
-        loadList()
+
         val lyricsList: MutableList<String> = populateList()
         val recyclerView = findViewById<View>(R.id.recyclerView) as RecyclerView
         val layoutManager = LinearLayoutManager(this)
@@ -34,10 +39,10 @@ class SongHistoryActivity : AppCompatActivity() {
 
     }
 
-    private fun loadList() {
-
-    }
-
+    /**
+     * Populates the list with the data that is needed for the recycler view. Checks if the list is
+     * empty and sets messages appopriately.
+     */
     private fun populateList(): MutableList<String> {
         var list: MutableList<String> = ArrayList()
         val msg = resources.getString(R.string.msg_song_history_list)

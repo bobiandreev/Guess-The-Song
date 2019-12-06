@@ -22,19 +22,28 @@ object FileReaderObject {
     private var formattedList: MutableList<String> = ArrayList()
     private var formattedString = ""
 
-    private var songHistoryList : MutableList<Song> = ArrayList()
+    private var songHistoryList: MutableList<Song> = ArrayList()
 
 
-    fun getSongHistoryList() : MutableList<Song>{
+    /**
+     * Returns the list which holds the songs the users have already gone through.
+     * @return Returns the list holding the song history
+     */
+    fun getSongHistoryList(): MutableList<Song> {
         return songHistoryList
     }
 
-    fun addToSongHistoryList(addition : Song){
+    /**
+     * Adds song to the song history list.
+     * @param addition Song to be added
+     */
+    fun addToSongHistoryList(addition: Song) {
         songHistoryList.add(addition)
     }
 
     /**
-     *
+     * Transforms the file titles to nice and readable strings.
+     * @param list list whose entries strings will be transformed
      */
     fun transformListToNiceString(list: MutableList<String>): MutableList<String> {
         list.forEach { s ->
@@ -48,20 +57,37 @@ object FileReaderObject {
         return formattedList
     }
 
-    fun transformToNiceString(string: String) : String{
+    /**
+     * Transforms a file name string into a readable string.
+     * @param string String to be transformed.
+     */
+    fun transformToNiceString(string: String): String {
         val arrayOf = string.split("\\(|\\)".toRegex())
         val artistName = arrayOf[0].replace('_', ' ').capitalizeWords()
         val songName = arrayOf[1].replace('_', ' ').capitalizeWords()
-        formattedString =  songName + " by " + artistName
+        formattedString = songName + " by " + artistName
         return formattedString
     }
 
+    /**
+     * Mehtod which capitalizes all words in a string.
+     * Source: StackOverflow
+     */
     fun String.capitalizeWords(): String = split(" ").map { it.capitalize() }.joinToString(" ")
 
-    fun getSongText(context: Context, path : String) : String {
+    /**
+     * Returns the full text of a song.
+     * @param context In which context of the application to call the method.
+     * @param path The path to the file which is opened.
+     */
+    fun getSongText(context: Context, path: String): String {
         return context.assets.open(path).bufferedReader().readText()
     }
 
+    /**
+     * Selects and loads a random clasic song from the list. It is then removed so its not selected again.
+     * @param context Context from which the method is called.
+     */
     fun loadClassicSong(context: Context) {
         classicsContentSearch = context.assets.list(classics)!!.toMutableList()
 
@@ -77,6 +103,10 @@ object FileReaderObject {
 
     }
 
+    /**
+     * Selects and loads a random modern song from the list. It is then removed so its not selected again.
+     * @param context Context from which the method is called.
+     */
     fun loadModernSong(context: Context) {
 
         modernContentSearch = context.assets.list(modern)!!.toMutableList()
@@ -92,42 +122,62 @@ object FileReaderObject {
         modernContent.remove(currentSongName)
     }
 
+    /**
+     * Select a random line from the text of the selected classic song and returns it.
+     * @return A random line from the song.
+     */
     fun nextLineClassic(): String {
         val randomLyricLine = classicSong.random()
         classicSong.remove(randomLyricLine)
         return randomLyricLine
     }
-
+    /**
+     * Select a random line from the text of the selected modern song and returns it.
+     * @return A random line from the song.
+     */
     fun nextLineCurrent(): String {
         val randomLyricLine = currentSong.random()
         currentSong.remove(randomLyricLine)
         return randomLyricLine
     }
 
-    fun getModernSongs(): MutableList<String> {
-        return modernContent
-    }
-
-    fun getClassicSongs(): MutableList<String> {
-        return classicsContent
-    }
-
+    /**
+     * Returns the full contents of the modern songs list for search.
+     * @return Full list of modern songs.
+     */
     fun getModernSongsSearch(): MutableList<String> {
         return modernContentSearch
     }
 
+    /**
+     * Returns the full contents of the classic songs list for search.
+     * @return Full list of modern songs.
+     */
     fun getClassicSongsSearch(): MutableList<String> {
         return classicsContentSearch
     }
 
+    /**
+     * Gets the name of the currently selected classic song.
+     * @return Currently selected classic song.
+     */
     fun getClassicSong(): String {
         return classicSongName
     }
 
+    /**
+     * Gets the name of the currently selected modern song.
+     * @return Currently selected modern song.
+     */
     fun getModernSong(): String {
         return currentSongName
     }
 
+    /**
+     * Sets the adapter for the autocomplete guessing field based on the play mode selected.
+     * @param context Context from which the method is called.
+     * @return The ready adapter for the AutoCompleteTextView based on the play mode selected.
+     */
     fun setAdapter(context: Context): ArrayAdapter<String> {
         if (MainMenuActivity.getMode()) {
             var songs: ArrayAdapter<String> =
@@ -136,15 +186,6 @@ object FileReaderObject {
                     R.layout.simple_list_item_1,
                     transformListToNiceString(getModernSongsSearch())
                 )
-            /*for (song in getModernSongsSearch()) {
-                var i = 0
-                while (i < songs.count) {
-                    if (songs.getItem(i).equals(song)) {
-                        songs.remove(song)
-                    }
-                }
-                songs.add(song)
-            }*/
             return songs
         } else {
             var songs: ArrayAdapter<String> =
@@ -153,15 +194,6 @@ object FileReaderObject {
                     R.layout.simple_list_item_1,
                     (transformListToNiceString(getClassicSongsSearch()))
                 )
-          /*  for (song in getClassicSongsSearch()) {
-                var i = 0
-                while (i < songs.count) {
-                    if (songs.getItem(i).equals(song)) {
-                        songs.remove(song)
-                    }
-                }
-                songs.add(song)
-            }*/
             return songs
         }
     }
