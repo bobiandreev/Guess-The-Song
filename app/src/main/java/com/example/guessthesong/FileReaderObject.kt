@@ -33,6 +33,9 @@ object FileReaderObject {
         songHistoryList.add(addition)
     }
 
+    /**
+     *
+     */
     fun transformListToNiceString(list: MutableList<String>): MutableList<String> {
         list.forEach { s ->
             // s.dropLast(4)
